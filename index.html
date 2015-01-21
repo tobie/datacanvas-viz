@@ -53,7 +53,7 @@ var SENSORS = [
     "uv"
 ];
 
-var SAMPLE = 10; // use on ein [SAMPLE] data points
+var sampling = 10;
 
 function msg(type, txt) {
     document.querySelector("p").innerHTML = txt;
@@ -66,6 +66,9 @@ function init(callback) {
         obj[pair[0]] = pair[1];
         return obj;
     }, {});
+    if (queryString.sampling && parseInt(queryString.sampling)) {
+        sampling = parseInt(queryString.sampling);
+    }
     if (SENSORS.indexOf(queryString.sensor) < 0) {
         msg("error", "Sensor \"" + queryString.sensor + "\" doesn't exist.");
         return;
@@ -99,9 +102,9 @@ function getData(user, mapper, callback) {
                 return;
             }
             if (data.length) {
-                msg("info", "Parsed " +  (SAMPLE * result.length + data.length) + " data points. Sampling 1 out of every " + SAMPLE + ".");
+                msg("info", "Parsed " +  (sampling * result.length + data.length) + " data points. Sampling 1 out of every " + sampling + " data points.");
                 data = data.filter(function(item, index) {
-                    return !(index % SAMPLE)
+                    return !(index % sampling)
                 });
                 data = data.map(mapper);
                 result.push.apply(result, data);
