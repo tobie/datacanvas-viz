@@ -78,7 +78,7 @@ function init(callback) {
             msg("error", "Can't find user \"" + queryString.user + "\".");
             return;
         }
-        document.querySelector("h1").innerHTML = result.data.name + "'s device in " + result.data.city;
+        document.querySelector("h1").innerHTML = result.data.device + " in " + result.data.city;
         document.querySelector("h2").innerHTML = queryString.sensor.substr(0,1).toUpperCase() + queryString.sensor.substr(1) + " Sensor";
         getData(queryString.user, mapper(queryString.sensor), callback);
     });
