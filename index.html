@@ -53,8 +53,8 @@ var SENSORS = [
     "uv"
 ];
 
-var sampling = 10;
-
+var sampling = 30;
+var since = new Date() - (1000 * 60 * 60 * 24 * 7); //default to a week;
 function msg(type, txt) {
     document.querySelector("p").innerHTML = txt;
     document.querySelector("p").className = type || "";
@@ -68,6 +68,9 @@ function init(callback) {
     }, {});
     if (queryString.sampling && parseInt(queryString.sampling)) {
         sampling = parseInt(queryString.sampling);
+    }
+    if (queryString.since && Date.parse(queryString.since)) {
+        since = Date.parse(queryString.since);
     }
     if (SENSORS.indexOf(queryString.sensor) < 0) {
         msg("error", "Sensor \"" + queryString.sensor + "\" doesn't exist.");
@@ -90,6 +93,7 @@ function setupMap(coords) {
     var map = L.mapbox.map('map', 'tobie.l0h17n04').setView(coords, 13);
     var marker = L.marker(coords).addTo(map);
 }
+
 function getData(user, mapper, callback) {
     var result = [];
     function next(index) {
@@ -102,17 +106,20 @@ function getData(user, mapper, callback) {
                 return;
             }
             if (data.length) {
-                msg("info", "Parsed " +  (sampling * result.length + data.length) + " data points. Sampling 1 out of every " + sampling + " data points.");
+                msg("info", "Parsed " +  (sampling * result.length + data.length) + " data points. Sampling 1 out of every " + sampling + " data points (approx. 1 sample every " + Math.round(sampling / 6) + " min) since " + new Date(since).toISOString().split("T")[0] + ".");
                 data = data.filter(function(item, index) {
                     return !(index % sampling)
                 });
                 data = data.map(mapper);
                 result.push.apply(result, data);
-                next(index + 1000);
-            } else {
-                setupMap(result[result.length-1].data.location);
-                callback(null, result);
+                if (data[data.length-1].date > since) {
+                    next(index + 1000);
+                    return;
+                }
             }
+ 
+            setupMap(result[result.length-1].data.location);
+            callback(null, result);
         });
     }
     next(0);
