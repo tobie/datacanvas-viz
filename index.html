@@ -52,7 +52,7 @@ var SENSORS = [
     "temperature",
     "uv"
 ];
-
+var count = 0;
 var sampling = 30;
 var since = new Date() - (1000 * 60 * 60 * 24 * 7); //default to a week;
 function msg(type, txt) {
@@ -106,7 +106,8 @@ function getData(user, mapper, callback) {
                 return;
             }
             if (data.length) {
-                msg("info", "Parsed " +  (sampling * result.length + data.length) + " data points. Sampling 1 out of every " + sampling + " data points (approx. 1 sample every " + Math.round(sampling / 6) + " min) since " + new Date(since).toISOString().split("T")[0] + ".");
+                count += data.length;
+                msg("info", "Parsed " + count + " data points. Sampling 1 out of every " + sampling + " data points (approx. 1 sample every " + Math.round(sampling / 6) + " min) since " + new Date(since).toISOString().split("T")[0] + ".");
                 data = data.filter(function(item, index) {
                     return !(index % sampling)
                 });
