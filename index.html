@@ -96,15 +96,14 @@ function setupMap(coords) {
 
 function getData(user, mapper, callback) {
     var result = [];
-    function next(timestamp) {
-        var url = "https://localdata-sensors.herokuapp.com/api/v1/sources/";
-        url += user;
-        url += "/entries?before=" + timestamp + "&sort=desc";
-        d3.json(url, function(error, data) {
+    function next(url) {
+
+        d3.json(url, function(error, response) {
             if (error) {
                 callback(error);
                 return;
             }
+            var data = response.data;
             if (data.length) {
                 timestamp = data[data.length-1].timestamp;
                 count += data.length;
@@ -114,8 +113,8 @@ function getData(user, mapper, callback) {
                 });
                 data = data.map(mapper);
                 result.push.apply(result, data);
-                if (Date.parse(timestamp) > since) {
-                    next(timestamp);
+                if (response.links.next && (Date.parse(timestamp) > since)) {
+                    next(response.links.next);
                     return;
                 }
             }
@@ -124,7 +123,12 @@ function getData(user, mapper, callback) {
             callback(null, result);
         });
     }
-    next(new Date().toISOString());
+    var url = "https://localdata-sensors.herokuapp.com/api/v1/sources/";
+    url += user;
+    url += "/entries?before=" + new Date().toISOString();
+    url += "&sort=desc";
+    url += "&count=1000";
+    next(url);
 }
 
 
