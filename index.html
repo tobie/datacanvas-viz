@@ -232,7 +232,11 @@ function brushed() {
 function mapper(propName) {
     return function (d) {
         d.date = parseDate(d.timestamp);
-        d.value = d.data[propName];
+        if (propName === "sound") {
+            d.value = (0.0158 * d.data[propName]) + 49.184;
+        } else {
+            d.value = d.data[propName];
+        }
         return d;
     };
 }
